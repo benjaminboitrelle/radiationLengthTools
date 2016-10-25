@@ -28,18 +28,19 @@
 
 int main(){
   
-  std::vector<std::string> fileInput;
-  fileInput.push_back("../plume1GeV_run746.root");
-  fileInput.push_back("../plume2GeV_run735.root");
-  fileInput.push_back("../plume3GeV_run724.root");
-  fileInput.push_back("../plume4GeV_run713.root");
-  fileInput.push_back("../plume5GeV_run702.root");
-  std::vector<float> theta0, theta0Error, radiationLength, radiationLengthError, measuredEnergy, momentum, momentumError;
+  std::vector<std::string> inputFiles;
+//  inputFiles.push_back("../plume1GeV_run746.root");
+  inputFiles.push_back("../plume1GeV.root");
+  inputFiles.push_back("../plume2GeV_run735.root");
+  inputFiles.push_back("../plume3GeV_run724.root");
+  inputFiles.push_back("../plume4GeV_run713.root");
+  inputFiles.push_back("../plume5GeV_run702.root");
+  std::vector<float> theta0, theta0Error, radiationLength, radiationLengthError, radiationLengthCorrected, measuredEnergy, momentum, momentumError;
   
   double energy = 1000.;
   int iterator = 0;
   
-  for (auto file: fileInput) {
+  for (auto file: inputFiles) {
     std::cout << "Processing file " << file << std::endl;
     readerTTree myTree;
     myTree.openTtree(file.c_str(), "tree");
@@ -53,12 +54,14 @@ int main(){
     radiationLength.push_back( myTree.calculateRadiationLength(energy));
     radiationLengthError.push_back( myTree.calculateRadiationLengthError(energy));
     measuredEnergy.push_back( myTree.calculateMeasuredEnergy(energy));
+    radiationLengthCorrected.push_back(myTree.calculateRadiationLengthCorrected());
     momentum.push_back(energy);
     momentumError.push_back(energy*0.05);
     energy += 1000.0;
     
     std::cout << "Theta0 = " << theta0.at(iterator) << " +/- " << theta0Error.at(iterator) << std::endl;
     std::cout << "x/X0 = " << radiationLength.at(iterator) << " +/- " << radiationLengthError.at(iterator) << std::endl;
+    std::cout << "x/X0 corrected: " << radiationLengthCorrected.at(iterator) << std::endl;
     std::cout << "Measured energy p = " << measuredEnergy.at(iterator) << std::endl;
     
     iterator++;
@@ -71,6 +74,8 @@ int main(){
   
   graphPlotting myGraph;
   std::string highlandFormula = "13.6*pow([0],0.555)/x"; // \theta_{0} = \frac{13.6 (MeV)}{p} \cdot \left( \frac{x}{X_{0}} \right)^{0.555}
+  //std::string highlandFormulaPDG = "13.6/x*sqrt([0])*(1+0.038*log([0]))";
+  //std::unique_ptr<TF1> fitHighland( new TF1("fitHighlandPDG", highlandFormula.c_str(), *energyMin, *energyMax));
   std::unique_ptr<TF1> fitHighland( new TF1("fitHighland", highlandFormula.c_str(), *energyMin, *energyMax));
   fitHighland->SetParameter(0, 1.);
   std::unique_ptr<TF1> fitPolynome1(new TF1("fitPolynome1", "pol1", *energyMin, *energyMax));
@@ -78,7 +83,8 @@ int main(){
     myGraph.plotGraphErrors(theta0.size(), momentum[0], theta0[0], momentumError[0], theta0Error[0], "fitHighland", "p (MeV)", "#theta_{0}", "theta0VsMomentum.png");
   }
   if (momentum.size() == radiationLength.size()) {
-    myGraph.plotGraph(radiationLength.size(), momentum[0], radiationLength[0], "fitPolynome1", "p (MeV)", "#frac{x}{X_{0}}", "radiationLengthVsMomentum.png" );
+    //myGraph.plotGraph(radiationLength.size(), momentum[0], radiationLength[0], "fitPolynome1", "p (MeV)", "#frac{x}{X_{0}}", "radiationLengthVsMomentum.png" );
+    myGraph.plotGraphErrors(radiationLength.size(), momentum[0], radiationLength[0], momentumError[0], radiationLengthError[0], "fitPolynome1", "p (MeV)", "#frac{x}{X_{0}}", "radiationLengthVsMomentum.png"  );
   }
   if (momentum.size() == measuredEnergy.size()) {
     myGraph.plotGraph(measuredEnergy.size(), momentum[0], measuredEnergy[0], "fitPolynome1", "p (MeV)", "Measured p (Mev)", "momentumMeasuredVsMomentumTB.png");

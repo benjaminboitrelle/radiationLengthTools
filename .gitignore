@@ -1,0 +1,15 @@
+.DS_Store
+Debug/
+Release/
+build/
+plume1GeV.root
+plume1GeV_run746.root
+plume2GeV.root
+plume2GeV_run735.root
+plume3GeV_run724.root
+plume4GeV_run713.root
+plume4GeV_run724.root
+plume5GeV.root
+plume5GeV_all.root
+plume5GeV_run702.root
+radiationLengthStudy/

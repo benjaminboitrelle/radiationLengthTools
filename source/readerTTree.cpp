@@ -27,6 +27,7 @@ readerTTree::readerTTree(){
   m_nEntries = 0;
   m_radiationLength = 0.;
   m_radiationLengthError = 0.;
+  m_radiationLengthCorrected = 0.;
   m_measuredEnergy = 0.;
   m_tree = nullptr;
   m_histogram = nullptr;
@@ -80,7 +81,7 @@ float readerTTree::calculateTheta0Error(){
 }
 
 float readerTTree::calculateRadiationLength(double energy){
-  m_radiationLength = pow((m_theta0*energy)/13.6, 1.8);
+  m_radiationLength = pow((m_theta0*energy)/13.6, 1/0.555);
   return m_radiationLength;
 }
 
@@ -92,6 +93,11 @@ float readerTTree::calculateRadiationLengthError(double energy){
 float readerTTree::calculateMeasuredEnergy(double energy){
   m_measuredEnergy = (13.6/m_theta0)*pow(m_radiationLength,0.555);
   return m_measuredEnergy;
+}
+
+float readerTTree::calculateRadiationLengthCorrected(){
+  m_radiationLengthCorrected = pow((m_theta0*m_measuredEnergy)/13.6, 1/0.555);
+  return m_radiationLengthCorrected;
 }
 
 void readerTTree::prindMeanKinkFit(){

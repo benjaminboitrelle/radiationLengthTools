@@ -27,6 +27,7 @@ public:
   float calculateTheta0Error();
   float calculateRadiationLength(double energy);
   float calculateRadiationLengthError(double energy);
+  float calculateRadiationLengthCorrected();
   float calculateMeasuredEnergy(double energy);
   void printKinkAngle();
   void printEntriesNumber();
@@ -45,6 +46,7 @@ private:
   float m_theta0Error;
   float m_radiationLength;
   float m_radiationLengthError;
+  float m_radiationLengthCorrected;
   float m_measuredEnergy;
   int m_nEntries;
 };
